@@ -60,7 +60,7 @@ class AldpBoltzmann(nn.Module, TargetDistribution):
                 (18, [16, 14, 8]),
                 (19, [18, 16, 14]),
                 (20, [18, 16, 19]),
-                (21, [18, 16, 19])
+                (21, [18, 16, 19]) # 17
             ]
             cart_indices = [6, 8, 9, 10, 14]
         elif transform == 'internal':
@@ -83,7 +83,7 @@ class AldpBoltzmann(nn.Module, TargetDistribution):
                 (18, [16, 14, 8]),
                 (19, [18, 16, 14]),
                 (20, [18, 16, 19]),
-                (21, [18, 16, 19])
+                (21, [18, 16, 19])  # 19
             ]
             cart_indices = [8, 6, 14]
 
@@ -112,7 +112,9 @@ class AldpBoltzmann(nn.Module, TargetDistribution):
             position = state.getPositions(True).value_in_unit(unit.nanometer)
             tmp_dir = tempfile.gettempdir()
             data_path = tmp_dir + '/aldp.pt'
-            torch.save(torch.tensor(position.reshape(1, 66).astype(np.float64)), data_path)
+
+            default_dtype = torch.get_default_dtype()
+            torch.save(torch.tensor(position.reshape(1, 66)).to(dtype=default_dtype), data_path)
 
             del (sim)
 

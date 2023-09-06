@@ -9,6 +9,8 @@ from fab.sampling_methods.transition_operators import HamiltonianMonteCarlo, Met
 from fab.wrappers.normflows import WrappedNormFlowModel
 from fab import FABModel
 from fab.core import ALPHA_DIV_TARGET_LOSSES
+from fab.utils.training import load_config
+import os
 
 
 def make_aldp_model(config, device):
@@ -47,7 +49,7 @@ def make_aldp_model(config, device):
     std_dih = target.coordinate_transform.transform.ic_transform.std_dih.cpu()
 
     ind = np.arange(ndim)
-    ind = np.concatenate([ind[:3 * ncarts - 6], -np.ones(6, dtype=np.int), ind[3 * ncarts - 6:]])
+    ind = np.concatenate([ind[:3 * ncarts - 6], -np.ones(6, dtype=int), ind[3 * ncarts - 6:]])
     ind = ind[permute_inv]
     dih_ind = ind[dih_ind_]
 
@@ -219,3 +221,12 @@ def make_aldp_model(config, device):
                      loss_type=loss_type,
                      alpha=alpha)
     return model
+
+if __name__ == "__main__":
+
+    os.chdir("../../")
+    config = load_config("./experiments/aldp/config/fab_buff.yaml")
+
+    config['data']['transform'] = None
+
+    make_aldp_model(config, torch.device('cpu'))
