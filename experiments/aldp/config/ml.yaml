@@ -2,7 +2,7 @@
 
 
 data:
-  transform: null #data/position_min_energy.pt
+  transform: data/position_min_energy.pt
   test: data/val.pt
   train: data/train.pt
 

@@ -134,7 +134,8 @@ class AldpBoltzmann(nn.Module, TargetDistribution):
             transform_data_npy = transform_data.reshape(-1, n_dim)
             transform_data = torch.from_numpy(transform_data_npy.astype("float64"))
         elif data_path[-2:] == 'pt':
-            transform_data = torch.load(data_path)
+            default_dtype = torch.get_default_dtype()
+            transform_data = torch.load(data_path).to(dtype=default_dtype)
         else:
             raise NotImplementedError('Loading data or this format is not implemented.')
 
