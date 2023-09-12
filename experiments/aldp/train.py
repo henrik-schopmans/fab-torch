@@ -24,7 +24,7 @@ from experiments.make_flow.make_aldp_model import make_aldp_model
 parser = argparse.ArgumentParser(description='Train Boltzmann Generator '
                                              'with various objectives')
 
-parser.add_argument('--config', type=str, default='../config/bm.yaml',
+parser.add_argument('--config', type=str, default='./config/ml.yaml',
                     help='Path config file specifying model '
                          'architecture and training procedure')
 parser.add_argument("--resume", action="store_true",
@@ -33,7 +33,7 @@ parser.add_argument("--tlimit", type=float, default=None,
                     help='Number of hours after which to stop training')
 parser.add_argument('--mode', type=str, default='gpu',
                     help='Compute mode, can be cpu, or gpu')
-parser.add_argument('--precision', type=str, default='double',
+parser.add_argument('--precision', type=str, default='float',
                     help='Precision to be used for computation, '
                          'can be float, double, or mixed')
 
@@ -352,6 +352,7 @@ for it in range(start_iter, max_iter):
         if grad_clipping:
             grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(),
                                                        max_grad_norm)
+            #print(f"grad_norm {it}: ", grad_norm)
             grad_norm_append = np.array([[it + 1, grad_norm.item()]])
             grad_norm_hist = np.concatenate([grad_norm_hist,
                                              grad_norm_append])
