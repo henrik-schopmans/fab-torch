@@ -5,3 +5,4 @@
 fab.egg-info
 .vscode
 experiments/aldp/data/*
+experiments/aldp/wandb
