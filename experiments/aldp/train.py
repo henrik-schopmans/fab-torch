@@ -22,7 +22,7 @@ from experiments.make_flow.make_aldp_model import make_aldp_model
 wandb.init(
     project="active_learning_aldp_tests_by_example",
     mode="online",
-    notes="Run directly in the fab repository.",
+    notes="Fab rep: Make a full run with kld.",
 )
 
 
@@ -468,7 +468,10 @@ for it in range(start_iter, max_iter):
             grad_norm = torch.nn.utils.clip_grad_norm_(
                 model.parameters(), max_grad_norm
             )
-            # print(f"grad_norm {it}: ", grad_norm)
+
+            if it % 300 == 0:
+                wandb.log({"grad_norm": grad_norm.item()}, step=it)
+
             grad_norm_append = np.array([[it + 1, grad_norm.item()]])
             grad_norm_hist = np.concatenate([grad_norm_hist, grad_norm_append])
         optimizer.step()
@@ -481,14 +484,15 @@ for it in range(start_iter, max_iter):
     loss_append = np.array([[it + 1, loss.item()]])
     loss_hist = np.concatenate([loss_hist, loss_append])
 
-    if it % 976 == 0:  # every epoch
-        # Log loss to wandb:
-        wandb.log({"loss": loss.item()}, step=int(it / 976))
+    if it % 300 == 0:
+        wandb.log({"loss": loss.item()}, step=it)
 
-    if it % (976 * 10) == 0:  # every 10 epochs
-        # Get and log test loss
-        test_loss = calculate_test_loss(model.flow, test_loader)
-        wandb.log({"test_loss": test_loss}, step=int(it / 976))
+    # Forward kld test loss:
+    # if it % 300 == 0:
+    #    # Get and log test loss
+    #    test_loss = calculate_test_loss(model.flow, test_loader)
+    #    # wandb.log({"test_forward_KL": test_loss}, step=int(it / 976))
+    #    wandb.log({"test_forward_KL": test_loss}, step=it)
 
     # Clear gradients
     nf.utils.clear_grad(model)
@@ -581,7 +585,7 @@ for it in range(start_iter, max_iter):
             buffer.save(os.path.join(cp_dir, "buffer.pt"))
             model.set_ais_target(min_is_target=False)  # Eval over p and not p^2/q.
 
-        # Draw samples
+        # Draw samples from the flow, no IS
         z_samples = torch.zeros(0, ndim).to(device)
         while z_samples.shape[0] < eval_samples_flow:
             with torch.no_grad():
@@ -608,7 +612,7 @@ for it in range(start_iter, max_iter):
             plot_dir=plot_dir_flow,
         )
 
-        # Draw samples
+        # Draw samples with IS
         z_samples = torch.zeros(0, ndim).to(device)
         while z_samples.shape[0] < eval_samples:
             z_ = model.annealed_importance_sampler.sample_and_log_weights(
