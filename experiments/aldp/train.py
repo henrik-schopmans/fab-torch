@@ -459,7 +459,14 @@ for it in range(start_iter, max_iter):
             buffer.adjust(log_w_adjust, log_q_x.detach(), indices)
 
     else:
-        loss = model.loss(batch_size)
+        try:
+            loss = model.loss(batch_size)
+        except Exception as e:
+            print("Exception caught in loss calculation.")
+            print(e)
+            print("Skipping iteration.")
+
+            loss = torch.tensor(np.nan)
 
     # Make step
     if not torch.isnan(loss) and not torch.isinf(loss):
@@ -469,7 +476,7 @@ for it in range(start_iter, max_iter):
                 model.parameters(), max_grad_norm
             )
 
-            if it % 300 == 0:
+            if it % 100 == 0:
                 wandb.log({"grad_norm": grad_norm.item()}, step=it)
 
             grad_norm_append = np.array([[it + 1, grad_norm.item()]])
@@ -484,7 +491,7 @@ for it in range(start_iter, max_iter):
     loss_append = np.array([[it + 1, loss.item()]])
     loss_hist = np.concatenate([loss_hist, loss_append])
 
-    if it % 300 == 0:
+    if it % 100 == 0:
         wandb.log({"loss": loss.item()}, step=it)
 
     # Forward kld test loss:
